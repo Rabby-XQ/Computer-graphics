@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Rotation Visualizer</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #050a0f;
+      color: #00ffcc;
+      font-family: 'Share Tech Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.4rem;
+      letter-spacing: 4px;
+      color: #00ffcc;
+      text-shadow: 0 0 20px #00ffcc88;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .subtitle {
+      font-size: 0.75rem;
+      color: #00ffcc55;
+      letter-spacing: 2px;
+      margin-bottom: 24px;
+    }
+
+    .main {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      max-width: 960px;
+    }
+
+    canvas {
+      border: 1px solid #00ffcc33;
+      box-shadow: 0 0 40px #00ffcc22, inset 0 0 40px #00000088;
+      background: #020d12;
+      border-radius: 4px;
+    }
+
+    .panel {
+      background: #071018;
+      border: 1px solid #00ffcc22;
+      border-radius: 4px;
+      padding: 20px;
+      width: 260px;
+      box-shadow: 0 0 20px #00000088;
+    }
+
+    .panel h2 {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 3px;
+      color: #00ffcc88;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #00ffcc22;
+      padding-bottom: 10px;
+    }
+
+    .axis-btn {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: transparent;
+      border: 1px solid #00ffcc33;
+      color: #00ffcc88;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-radius: 2px;
+    }
+
+    .axis-btn:hover {
+      background: #00ffcc11;
+      color: #00ffcc;
+    }
+
+    .axis-btn.active-x {
+      border-color: #ff4466;
+      color: #ff4466;
+      background: #ff446611;
+      box-shadow: 0 0 10px #ff446633;
+    }
+
+    .axis-btn.active-y {
+      border-color: #44ff66;
+      color: #44ff66;
+      background: #44ff6611;
+      box-shadow: 0 0 10px #44ff6633;
+    }
+
+    .axis-btn.active-z {
+      border-color: #4488ff;
+      color: #4488ff;
+      background: #4488ff11;
+      box-shadow: 0 0 10px #4488ff33;
+    }
+
+    .slider-group {
+      margin-top: 16px;
+    }
+
+    .slider-group label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #00ffcc66;
+      margin-bottom: 6px;
+    }
+
+    .slider-group label span {
+      color: #00ffcc;
+    }
+
+    input[type=range] {
+      width: 100%;
+      -webkit-appearance: none;
+      height: 3px;
+      background: #00ffcc22;
+      border-radius: 2px;
+      outline: none;
+      margin-bottom: 14px;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #00ffcc;
+      box-shadow: 0 0 8px #00ffcc;
+      cursor: pointer;
+    }
+
+    .formula-box {
+      margin-top: 16px;
+      background: #020d12;
+      border: 1px solid #00ffcc22;
+      border-radius: 2px;
+      padding: 12px;
+      font-size: 0.72rem;
+      line-height: 1.9;
+      color: #00ffcc88;
+    }
+
+    .formula-box .eq {
+      color: #00ffcc;
+    }
+
+    .formula-box .axis-x {
+      color: #ff4466;
+    }
+
+    .formula-box .axis-y {
+      color: #44ff66;
+    }
+
+    .formula-box .axis-z {
+      color: #4488ff;
+    }
+
+    .coords {
+      margin-top: 12px;
+      font-size: 0.72rem;
+      color: #00ffcc55;
+      line-height: 2;
+    }
+
+    .coords span {
+      color: #00ffcc;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .ctrl-btn {
+      flex: 1;
+      padding: 8px;
+      background: transparent;
+      border: 1px solid #00ffcc33;
+      color: #00ffcc77;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.2s;
+      letter-spacing: 1px;
+    }
+
+    .ctrl-btn:hover {
+      background: #00ffcc11;
+      color: #00ffcc;
+    }
+
+    .ctrl-btn.active {
+      background: #00ffcc22;
+      color: #00ffcc;
+      border-color: #00ffcc66;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>3D ROTATION VISUALIZER</h1>
+  <div class="subtitle">INTERACTIVE TRANSFORMATION ENGINE</div>
+
+  <div class="main">
+    <canvas id="canvas" width="480" height="480"></canvas>
+
+    <div class="panel">
+      <h2>// SELECT AXIS</h2>
+      <button class="axis-btn active-x" onclick="setAxis('x')">X — AXIS ROTATION</button>
+      <button class="axis-btn" onclick="setAxis('y')">Y — AXIS ROTATION</button>
+      <button class="axis-btn" onclick="setAxis('z')">Z — AXIS ROTATION</button>
+
+      <div class="slider-group">
+        <label>SPEED <span id="speedVal">2</span></label>
+        <input type="range" id="speed" min="0" max="5" step="0.5" value="2">
+        <label>ANGLE <span id="angleVal">0°</span></label>
+        <input type="range" id="angleSlider" min="0" max="360" value="0">
+      </div>
+
+      <div class="btn-row">
+        <button class="ctrl-btn active" id="playBtn" onclick="togglePlay()">⏵ PLAY</button>
+        <button class="ctrl-btn" onclick="resetAngle()">↺ RESET</button>
+      </div>
+
+      <div class="formula-box" id="formulaBox">
+        <div>ROTATION AROUND <span class="axis-x">X-AXIS</span></div>
+        <div class="eq">x' = x</div>
+        <div class="eq">y' = y·cosθ − z·sinθ</div>
+        <div class="eq">z' = y·sinθ + z·cosθ</div>
+      </div>
+
+      <div class="coords" id="coords">
+        ORIGINAL: <span>(1, 1, 0)</span><br>
+        ROTATED: <span id="rotated">—</span><br>
+        ANGLE θ: <span id="thetaVal">0°</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const cx = W / 2, cy = H / 2;
+
+    let axis = 'x';
+    let angle = 0;
+    let playing = true;
+    let speedVal = 2;
+
+    const formulas = {
+      x: `<div>ROTATION AROUND <span class="axis-x">X-AXIS</span></div><div class="eq">x' = x</div><div class="eq">y' = y·cosθ − z·sinθ</div><div class="eq">z' = y·sinθ + z·cosθ</div>`,
+      y: `<div>ROTATION AROUND <span class="axis-y">Y-AXIS</span></div><div class="eq">x' = x·cosθ + z·sinθ</div><div class="eq">y' = y</div><div class="eq">z' = z·cosθ − x·sinθ</div>`,
+      z: `<div>ROTATION AROUND <span class="axis-z">Z-AXIS</span></div><div class="eq">x' = x·cosθ − y·sinθ</div><div class="eq">y' = x·sinθ + y·cosθ</div><div class="eq">z' = z</div>`
+    };
+
+    const axisColors = { x: '#ff4466', y: '#44ff66', z: '#4488ff' };
+
+    function setAxis(a) {
+      axis = a;
+      document.querySelectorAll('.axis-btn').forEach(b => b.className = 'axis-btn');
+      document.querySelectorAll('.axis-btn')[['x', 'y', 'z'].indexOf(a)].className = `axis-btn active-${a}`;
+      document.getElementById('formulaBox').innerHTML = formulas[a];
+    }
+
+    function togglePlay() {
+      playing = !playing;
+      const btn = document.getElementById('playBtn');
+      btn.textContent = playing ? '⏸ PAUSE' : '⏵ PLAY';
+      btn.classList.toggle('active', playing);
+    }
+
+    function resetAngle() {
+      angle = 0;
+      document.getElementById('angleSlider').value = 0;
+    }
+
+    document.getElementById('speed').addEventListener('input', e => {
+      speedVal = parseFloat(e.target.value);
+      document.getElementById('speedVal').textContent = speedVal;
+    });
+
+    document.getElementById('angleSlider').addEventListener('input', e => {
+      angle = parseFloat(e.target.value) * Math.PI / 180;
+      playing = false;
+      document.getElementById('playBtn').textContent = '⏵ PLAY';
+      document.getElementById('playBtn').classList.remove('active');
+    });
+
+    // Project 3D to 2D (simple orthographic + slight perspective)
+    function project(x, y, z) {
+      const scale = 120;
+      // Simple isometric-ish projection
+      const px = cx + (x - z * 0.5) * scale;
+      const py = cy + (-y + z * 0.3) * scale;
+      return { px, py };
+    }
+
+    function rotate(x, y, z, a) {
+      const c = Math.cos(a), s = Math.sin(a);
+      if (axis === 'x') return { x, y: y * c - z * s, z: y * s + z * c };
+      if (axis === 'y') return { x: x * c + z * s, y, z: z * c - x * s };
+      if (axis === 'z') return { x: x * c - y * s, y: x * s + y * c, z };
+    }
+
+    function drawGrid() {
+      ctx.strokeStyle = '#00ffcc0a';
+      ctx.lineWidth = 1;
+      for (let i = -3; i <= 3; i++) {
+        const a = project(i, -3, 0), b = project(i, 3, 0);
+        ctx.beginPath(); ctx.moveTo(a.px, a.py); ctx.lineTo(b.px, b.py); ctx.stroke();
+        const c = project(-3, i, 0), d = project(3, i, 0);
+        ctx.beginPath(); ctx.moveTo(c.px, c.py); ctx.lineTo(d.px, d.py); ctx.stroke();
+      }
+    }
+
+    function drawAxes() {
+      const origin = project(0, 0, 0);
+      const axes = [
+        { end: project(2, 0, 0), color: '#ff446688', label: 'X' },
+        { end: project(0, 2, 0), color: '#44ff6688', label: 'Y' },
+        { end: project(0, 0, 2), color: '#4488ff88', label: 'Z' }
+      ];
+      axes.forEach(ax => {
+        ctx.strokeStyle = ax.color;
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(origin.px, origin.py);
+        ctx.lineTo(ax.end.px, ax.end.py);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = ax.color;
+        ctx.font = '11px Share Tech Mono';
+        ctx.fillText(ax.label, ax.end.px + 6, ax.end.py + 4);
+      });
+    }
+
+    // Cube vertices
+    const cubeVerts = [
+      [-0.5, -0.5, -0.5], [0.5, -0.5, -0.5], [0.5, 0.5, -0.5], [-0.5, 0.5, -0.5],
+      [-0.5, -0.5, 0.5], [0.5, -0.5, 0.5], [0.5, 0.5, 0.5], [-0.5, 0.5, 0.5]
+    ];
+
+    const cubeEdges = [
+      [0, 1], [1, 2], [2, 3], [3, 0],
+      [4, 5], [5, 6], [6, 7], [7, 4],
+      [0, 4], [1, 5], [2, 6], [3, 7]
+    ];
+
+    function drawCube(a, color, alpha, lineW) {
+      const rv = cubeVerts.map(([x, y, z]) => {
+        const r = rotate(x, y, z, a);
+        return project(r.x, r.y, r.z);
+      });
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = alpha;
+      ctx.lineWidth = lineW;
+      cubeEdges.forEach(([i, j]) => {
+        ctx.beginPath();
+        ctx.moveTo(rv[i].px, rv[i].py);
+        ctx.lineTo(rv[j].px, rv[j].py);
+        ctx.stroke();
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    // Draw rotation arc
+    function drawArc() {
+      const color = axisColors[axis];
+      ctx.strokeStyle = color + '55';
+      ctx.lineWidth = 1;
+
+      // Draw arc circle around rotation axis
+      const steps = 60;
+      const r = 90;
+      ctx.beginPath();
+      for (let i = 0; i <= steps; i++) {
+        const a = (i / steps) * Math.PI * 2;
+        let x, y, z;
+        if (axis === 'x') { x = 0; y = Math.cos(a) * 0.8; z = Math.sin(a) * 0.8; }
+        else if (axis === 'y') { y = 0; x = Math.cos(a) * 0.8; z = Math.sin(a) * 0.8; }
+        else { z = 0; x = Math.cos(a) * 0.8; y = Math.sin(a) * 0.8; }
+        const p = project(x, y, z);
+        i === 0 ? ctx.moveTo(p.px, p.py) : ctx.lineTo(p.px, p.py);
+      }
+      ctx.stroke();
+    }
+
+    // Highlight active axis
+    function drawActiveAxis() {
+      const color = axisColors[axis];
+      const origin = project(0, 0, 0);
+      let end;
+      if (axis === 'x') end = project(2.2, 0, 0);
+      else if (axis === 'y') end = project(0, 2.2, 0);
+      else end = project(0, 0, 2.2);
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.moveTo(origin.px, origin.py);
+      ctx.lineTo(end.px, end.py);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Draw dot at origin
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(origin.px, origin.py, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawAngleIndicator() {
+      const deg = Math.round(angle * 180 / Math.PI) % 360;
+      const color = axisColors[axis];
+      ctx.fillStyle = color;
+      ctx.font = '700 13px Orbitron, monospace';
+      ctx.fillText(`θ = ${deg}°`, 14, 24);
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      // Background subtle glow
+      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 240);
+      grad.addColorStop(0, '#051520');
+      grad.addColorStop(1, '#020d12');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+
+      drawGrid();
+      drawAxes();
+      drawArc();
+      drawActiveAxis();
+
+      // Ghost cube at angle=0
+      drawCube(0, '#00ffcc', 0.08, 1);
+
+      // Trail cubes
+      for (let i = 1; i <= 5; i++) {
+        drawCube(angle - i * 0.15, axisColors[axis], 0.04 + i * 0.02, 0.5);
+      }
+
+      // Main cube
+      const color = axisColors[axis];
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 8;
+      drawCube(angle, color, 1, 2);
+      ctx.shadowBlur = 0;
+
+      drawAngleIndicator();
+
+      // Update coords
+      const r = rotate(1, 1, 0, angle);
+      document.getElementById('rotated').textContent =
+        `(${r.x.toFixed(2)}, ${r.y.toFixed(2)}, ${r.z.toFixed(2)})`;
+      document.getElementById('thetaVal').textContent =
+        `${(angle * 180 / Math.PI % 360).toFixed(1)}°`;
+      document.getElementById('angleVal').textContent =
+        `${Math.round(angle * 180 / Math.PI) % 360}°`;
+      if (!playing) document.getElementById('angleSlider').value = (angle * 180 / Math.PI) % 360;
+    }
+
+    function loop() {
+      if (playing) angle += speedVal * 0.01;
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    loop();
+  </script>
+</body>
+
+</html>
